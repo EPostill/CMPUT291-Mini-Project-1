@@ -31,7 +31,7 @@ def log_in():
     return
              
 
-def main():
+def __main__():
     print('Welcome to the mini project 1 database')
 
     while True:
