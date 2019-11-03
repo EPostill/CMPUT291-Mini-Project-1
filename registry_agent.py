@@ -124,26 +124,29 @@ def process_bill_of_sale():
     print('Proces a Bill of Sale')
 
     #retrieve VIN and search for most recent registration
-    vin = (int(input("VIN of vehicle: ")),)
+    vin = input("VIN of vehicle: ")
+    try:
+        int(vin)
+    except:
+        print("VIN must be a number")
+        return
     
     con.c.execute("""
         SELECT * FROM registrations
         WHERE vin=?
         ORDER BY regdate DESC;
-        """, vin)
+        """, (vin,))
     recent_reg=con.c.fetchone()
 
     #make sure registration exists
     if not recent_reg:
-        print("VIN incorrect - not found")
+        print("that VIN does not exist on the database")
         return
 
     #get owners name and confirm with registration
     owner_fname, owner_lname = input("Name of current owner(First Last): ").split()
-    if recent_reg['fname'].lower() != owner_fname.lower() or recent_reg['lname'].lower != owner_lname.lower():
+    if recent_reg['fname'].lower() != owner_fname.lower() or  recent_reg['lname'].lower() != owner_lname.lower():
         print("{} {} does not match most recent owner".format(owner_fname, owner_lname))
-        #  **************  debug statement ************************
-        print("CurrentOwner:{}{}Input:{}{}.".format(recent_reg['fname'].lower(), recent_reg['lname'].lower(), owner_fname.lower(), owner_lname.lower()) )
         return
 
     #set registration to expire today
@@ -151,10 +154,21 @@ def process_bill_of_sale():
     UPDATE registrations
     SET expiry = ?
     WHERE regno = ?;
-    """, {date.today(), recent_reg['regno']})
+    """, (date.today(), recent_reg['regno']))
 
     #Register new owner
     new_fname, new_lname = input("Name of new owner(First Last): ").split()
+    con.c.execute("""
+    SELECT *
+    FROM persons
+    WHERE fname=? COLLATE NOCASE
+    AND lname=? COLLATE NOCASE
+    """, (new_fname, new_lname))
+    if not con.c.fetchone():
+        print("That person does not exist!")
+        return
+
+
     new_plate = input("New Liscense Plate: ")
     d = date.today()
     expiry = d.replace(year=d.year + 1)
@@ -165,13 +179,11 @@ def process_bill_of_sale():
     VALUES(:regno, :regdate, :expiry, :plate, :vin, :fname, :lname);
     """, {'regno': regno, 'regdate': d, 'expiry': expiry, 'plate': new_plate, 'vin':  recent_reg['vin'], 'fname': new_fname, 'lname': new_lname})
 
-    con.connection.commit()
-
     print("Bill of Sale Successfully Processed")
     return
 
 
-def get_tno(c):
+def get_tno():
     # queries the information about the tno of interest
     # c - the cursor for the database
     tno = input("Enter your ticket number (tno): ")
@@ -186,8 +198,8 @@ def get_tno(c):
         return isValid, result, tno
 
     # query for the desired information
-    c.execute("select * from payments where tno = :num;", {"num":tno})
-    result = c.fetchall()
+    con.c.execute("select * from payments where tno = :num;", {"num":tno})
+    result = con.c.fetchall()
 	
     # make sure the query is valid
     try:
@@ -293,12 +305,10 @@ def get_driver_abstract():
 
 
 def new_primary_key(table, primary_key):
-    con.c.execute("""
-    SELECT Max(?)
-    FROM ?;
-    """, {primary_key, table})
+    query = """SELECT Max({}) FROM {};""".format(primary_key, table)
+    con.c.execute(query)
 
-    return int(con.c.fetchone()) + 1
+    return int(con.c.fetchone()[0]) + 1
 
 
 
@@ -319,7 +329,6 @@ def register_birth(user_info):
                         unique=True
                 
                 valid_entry,mfname,mlname,ffname,flname=secure_name_input()
-                con.connection.commit()
                 
                 mother_registered,mother_info=is_parent_in_register(mfname,mlname)
                 father_registered,father_info=is_parent_in_register(ffname,flname)
@@ -342,7 +351,6 @@ def register_birth(user_info):
 
                 
                 add_child(generated_birthregno,user_bplace,mfname,mlname,ffname,flname,mother_address,mother_phone)
-                con.connection.commit()
                 print("Birth registered sucessfully")
             except sqlite3.OperationalError as e:
                 if "locked" in e.args[0]:
@@ -387,7 +395,6 @@ def register_birth(user_info):
 
 
             con.c.execute(""" SELECT * FROM persons WHERE UPPER(fname)=:pfname AND UPPER(lname)=:plname """, {'pfname':pfname.upper(), 'plname':plname.upper()})
-            con.connection.commit()
             parent_info = con.c.fetchone()
             if parent_info != None:
                 return True,parent_info
@@ -500,7 +507,6 @@ def register_birth(user_info):
                     safe_gender_format = True
                         
             con.c.execute(""" INSERT INTO persons values (:fname,:lname,:bdate,:bplace,:address,:phone) """,{'fname':cfname,'lname':clname,'bdate':today, 'bplace':user_bplace,'address':mother_address,'phone':mother_phone})
-            con.connection.commit()
             con.c.execute(""" INSERT INTO births values (:regno,:fname,:lname,:regdate,:regplace,:gender,:f_fname,:f_lname,:m_fname,:m_lname)""",{'regno':generated_birthregno,'fname':cfname,'lname':clname,'regplace':user_bplace,'regdate':today,'gender':gender.upper(),'f_fname':ffname,'f_lname':flname,'m_fname':mfname,'m_lname':mlname})
             
             con.connection.commit()
@@ -582,7 +588,6 @@ def register_marriage(user_info):
         
     def is_partner_in_register(pfname,plname):
             con.c.execute(""" SELECT * FROM persons WHERE UPPER(fname)=:pfname AND UPPER(lname)=:plname """, {'pfname':pfname.upper(), 'plname':plname.upper()})
-            con.connection.commit()
             partner_info = con.c.fetchone()
             if partner_info != None:
                 return True,partner_info

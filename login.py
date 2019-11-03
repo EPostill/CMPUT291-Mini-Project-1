@@ -28,7 +28,7 @@ def log_in():
                     return
 
         response = input("Login Failed, Would you like to try again (y/n)?")
-        if response.lower != 'y':
+        if response.lower() != 'y':
             return
     return
              
