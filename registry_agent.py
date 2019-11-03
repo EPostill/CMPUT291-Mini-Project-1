@@ -15,7 +15,12 @@ def agent_terminal(user_info):
     print("7 - log out")
 
     while True:
-        intent = int(input("please type the number of the action you would like to perform: "))
+        intent = input("please type the number of the action you would like to perform: ")
+        try:
+            int(intent)
+        except:
+            pass
+
         if intent == 1:
             register_birth(user_info)
         elif intent == 2:
@@ -256,8 +261,13 @@ def get_driver_abstract():
     AND fname = ? COLLATE NOCASE
     AND lname = ? COLLATE NOCASE;
     """, {fname, lname})
+    result = con.c.fetchone()
 
-    tickets = con.c.fetchone()['tickets']
+    if not result:
+        print("Driver not found")
+        return
+
+    tickets = result['tickets']
 
     #get number of demerit notices, get demerits within 2 yrs and lifetime demerits
     con.c.execute("""

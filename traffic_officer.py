@@ -11,7 +11,12 @@ def officer_terminal():
     print("3 - Log out")
 
     while True:
-        intent = int(input("please type the number of the action you would like to perform: "))
+        intent = input("please type the number of the action you would like to perform: ")
+        try:
+            int(intent)
+        except:
+            pass
+
         if intent == 1:
             issue_a_ticket()
         elif intent == 2:
