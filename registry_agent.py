@@ -1,5 +1,5 @@
 import connection as con
-import datetime as date
+from datetime import date
 
 def agent_terminal():
     print("Welcome, as a registry agent, you may perform any of the below:")
