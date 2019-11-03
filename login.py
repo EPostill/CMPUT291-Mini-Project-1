@@ -47,3 +47,5 @@ def main():
     con.c.close()
 
     return
+
+main()

@@ -11,7 +11,7 @@ def officer_terminal():
     print("3 - Log out")
 
     while True:
-        intent = input("please type the number of the action you would like to perform")
+        intent = int(input("please type the number of the action you would like to perform"))
         if intent == 1:
             issue_a_ticket()
         elif intent == 2:
@@ -28,7 +28,7 @@ def issue_a_ticket():
         try:
             today = date.today().strftime("%Y-%m-%d")
             
-            unique=False
+            unique = False
             while not unique:
                 generated_tno = random.randint(1,1001)
                 con.c.execute("""SELECT tno from tickets WHERE regno=:generated_tno  """,{'generated_tno':generated_tno})

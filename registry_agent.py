@@ -15,7 +15,7 @@ def agent_terminal(user_info):
     print("7 - log out")
 
     while True:
-        intent = input("please type the number of the action you would like to perform")
+        intent = int(input("please type the number of the action you would like to perform"))
         if intent == 1:
             register_birth(user_info)
         elif intent == 2:
