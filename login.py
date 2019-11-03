@@ -37,7 +37,7 @@ def main():
     print('Welcome to the mini project 1 database')
 
     while True:
-        intent = input("Please input 'L' to login or 'Q' to quit")
+        intent = input("Please input 'L' to login or 'Q' to quit: ")
 
         if intent.lower() == 'l':
             log_in()

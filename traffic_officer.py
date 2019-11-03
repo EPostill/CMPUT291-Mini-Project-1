@@ -86,8 +86,6 @@ def issue_a_ticket():
                             print('the format is incorrect format retry')                  
                 
             con.c.execute(""" INSERT INTO tickets values (:tno,:regno,:fine,:violation,:vdate)""",{'tno':generated_tno,'regno':regno,'fine':fine,'violation':description,'vdate':today})
-            con.connection.commit()
-            con.connection.close()
             print("Ticket registered succesfully")
 
         
