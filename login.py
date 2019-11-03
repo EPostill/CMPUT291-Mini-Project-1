@@ -21,7 +21,7 @@ def log_in():
             if user_info != None:                                                   #if the result is not empty ends the while loop and returns the user_info and a boolean True
                 account_type = user_info['utype']
                 if account_type == 'a':
-                    r_a.agent_terminal()
+                    r_a.agent_terminal(user_info)
                 else:
                     t_o.officer_terminal()
 

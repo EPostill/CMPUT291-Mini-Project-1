@@ -4,7 +4,7 @@ import re
 import connection as con
 from datetime import date, datetime
 
-def agent_terminal():
+def agent_terminal(user_info):
     print("Welcome, as a registry agent, you may perform any of the below:")
     print("1 - Register a birth")
     print("2 - Register a marriage")
@@ -17,9 +17,9 @@ def agent_terminal():
     while True:
         intent = input("please type the number of the action you would like to perform")
         if intent == 1:
-            register_birth()
+            register_birth(user_info)
         elif intent == 2:
-            register_marriage()
+            register_marriage(user_info)
         elif intent == 3:
             renew_vehicle_reg()
         elif intent == 4:
@@ -84,7 +84,6 @@ def query(userRegno, cur):
     return isValid, userRegno, res
 
 def renew_vehicle_reg():
-    path = "./mini_project.db"
 
     userRegno = None
 
