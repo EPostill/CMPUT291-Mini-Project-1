@@ -85,6 +85,7 @@ def query(userRegno, cur):
     return isValid, userRegno, res
 
 def renew_vehicle_reg():
+    c = con.cursor()
 
     userRegno = None
 
@@ -168,6 +169,66 @@ def process_bill_of_sale():
     print("Bill of Sale Successfully Processed")
     return
 
+
+def get_tno(c):
+    # queries the information about the tno of interest
+    # c - the cursor for the database
+    tno = input("Enter your ticket number (tno): ")
+    result = None
+    isValid = False
+
+    # make sure tno is a number
+    try:
+        int(tno)
+    except:
+        print("Error. Ticket number should be a number.")
+        return isValid, result, tno
+
+    # query for the desired information
+    c.execute("select * from payments where tno = :num;", {"num":tno})
+    result = c.fetchall()
+	
+    # make sure the query is valid
+    try:
+        result[0][0]
+        isValid = True
+    except:
+        print("Error. Please enter a valid ticket number.")
+        return isValid, result, tno
+
+    return isValid, result, tno
+
+
+def process_payment():
+    c = con.cursor()
+    # query the necessary information
+    validQuery = False
+    while (validQuery == False):
+        validQuery, result, tno = get_tno(c)
+
+    paymentInfo = result[0]
+    # currOwed is the currently owned value
+    currOwed = int(paymentInfo[2])
+    # currDate is the current date
+    currDate = datetime.date.today()
+
+    # tell user how much they owe then ask for a payment input      
+    print("You currently owe " + str(currOwed) + ".")
+    payment = int(input("Enter the amount you would like to pay: "))
+
+
+    # ensure that the inputted payment does not exceed that which is owed
+    while ((currOwed - payment) < 0):
+        print("You have payed too much. Please enter a lower value. You currently owe " + str(currOwed) + ".")
+        payment = int(input("Enter the amount you would like to pay: "))
+
+    # find out how much is owed after payment
+    currOwed = currOwed - payment
+    # update with the new information
+    c.execute("update payments set pdate = :date where tno = :tno;", {"date":currDate, "tno":tno})
+    c.execute("update payments set amount = :num where tno = :tno;", {"num":currOwed, "tno":tno})
+
+    return
 
 
 def get_driver_abstract():
