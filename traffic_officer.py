@@ -98,7 +98,7 @@ def issue_a_ticket():
                     con.connection.close()
                 
        
-    def validate_regno(c,conn):
+    def validate_regno():
         safe_regno_format = False
         regno_is_real = False
              
@@ -106,8 +106,8 @@ def issue_a_ticket():
             txt=("Please input the offender's regno ")
             regno_input=input(txt)
             while regno_is_real == False and re.match("^[0-9]*$", regno_input):
-                    c.execute(""" SELECT regno FROM registrations WHERE regno=:regno_input""",{'regno_input':regno_input})
-                    regno_info=c.fetchone()                     
+                    con.c.execute(""" SELECT regno FROM registrations WHERE regno=:regno_input""",{'regno_input':regno_input})
+                    regno_info=con.c.fetchone()                     
                     if regno_info != None:                          #if the result is not empty ends the while loop                                       
                         regno_is_real = True
                         return regno_input
