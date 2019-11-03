@@ -79,7 +79,7 @@ def query(userRegno, cur):
     try:
         # this throws an error if the query is not as expected, ie empty or an int/str
         res[0][0]
-        # if above didnt through an error, query is valid
+        # if above didnt throw an error, query is valid
         isValid = True
     except:
         # print error if query isnt valid
@@ -89,8 +89,6 @@ def query(userRegno, cur):
     return isValid, userRegno, res
 
 def renew_vehicle_reg():
-    path = "./mini_project.db"
-
     userRegno = None
 
     # get the regno
