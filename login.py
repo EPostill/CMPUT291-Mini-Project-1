@@ -31,7 +31,7 @@ def log_in():
     return
              
 
-def __main__():
+def main():
     print('Welcome to the mini project 1 database')
 
     while True:
@@ -40,8 +40,8 @@ def __main__():
         if intent.lower() == 'l':
             log_in()
         elif intent.lower() == 'q':
-            con.connection.commit()
-            con.c.close()
-            return
+            break
         else:
             print("Invalid input")
+    con.connection.commit()
+    con.c.close()
