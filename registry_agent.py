@@ -85,7 +85,6 @@ def query(userRegno, cur):
     return isValid, userRegno, res
 
 def renew_vehicle_reg():
-    c = con.cursor()
 
     userRegno = None
 
@@ -125,13 +124,13 @@ def process_bill_of_sale():
     print('Proces a Bill of Sale')
 
     #retrieve VIN and search for most recent registration
-    vin = input("VIN of vehicle: ")
+    vin = (int(input("VIN of vehicle: ")),)
     
     con.c.execute("""
         SELECT * FROM registrations
         WHERE vin=?
         ORDER BY regdate DESC;
-        """, {vin,})
+        """, vin)
     recent_reg=con.c.fetchone()
 
     #make sure registration exists
@@ -141,8 +140,10 @@ def process_bill_of_sale():
 
     #get owners name and confirm with registration
     owner_fname, owner_lname = input("Name of current owner(First Last): ").split()
-    if recent_reg['fname'].lower() != owner_fname or recent_reg['lname'].lower != owner_lname:
+    if recent_reg['fname'].lower() != owner_fname.lower() or recent_reg['lname'].lower != owner_lname.lower():
         print("{} {} does not match most recent owner".format(owner_fname, owner_lname))
+        #  **************  debug statement ************************
+        print("CurrentOwner:{}{}Input:{}{}.".format(recent_reg['fname'].lower(), recent_reg['lname'].lower(), owner_fname.lower(), owner_lname.lower()) )
         return
 
     #set registration to expire today
@@ -200,7 +201,6 @@ def get_tno(c):
 
 
 def process_payment():
-    c = con.cursor()
     # query the necessary information
     validQuery = False
     while (validQuery == False):
@@ -225,8 +225,8 @@ def process_payment():
     # find out how much is owed after payment
     currOwed = currOwed - payment
     # update with the new information
-    c.execute("update payments set pdate = :date where tno = :tno;", {"date":currDate, "tno":tno})
-    c.execute("update payments set amount = :num where tno = :tno;", {"num":currOwed, "tno":tno})
+    con.c.execute("update payments set pdate = :date where tno = :tno;", {"date":currDate, "tno":tno})
+    con.c.execute("update payments set amount = :num where tno = :tno;", {"num":currOwed, "tno":tno})
 
     return
 
