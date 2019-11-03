@@ -22,8 +22,10 @@ def log_in():
                 account_type = user_info['utype']
                 if account_type == 'a':
                     r_a.agent_terminal(user_info)
+                    return
                 else:
                     t_o.officer_terminal()
+                    return
 
         response = input("Login Failed, Would you like to try again (y/n)?")
         if response.lower != 'y':
