@@ -117,6 +117,8 @@ def renew_vehicle_reg():
 
     con.c.close()
 
+
+
 def process_bill_of_sale():
     print('Proces a Bill of Sale')
 
@@ -164,6 +166,8 @@ def process_bill_of_sale():
 
     print("Bill of Sale Successfully Processed")
     return
+
+
 
 def get_driver_abstract():
     print("Get Driver Abstract")
@@ -224,6 +228,8 @@ def get_driver_abstract():
 
     return
 
+
+
 def new_primary_key(table, primary_key):
     con.c.execute("""
     SELECT Max(?)
@@ -231,6 +237,7 @@ def new_primary_key(table, primary_key):
     """, {primary_key, table})
 
     return int(con.c.fetchone()) + 1
+
 
 
 def register_birth(user_info):
