@@ -40,8 +40,88 @@ def register_birth():
 def register_marriage():
     pass
 
+def add_year(Date, years):
+    # increments a given date Date by a number of years
+    # Date - date to be incremented
+    # years - number of years to increment date by
+
+    try:
+        # adds years to the date
+        return Date.replace(year = Date.year + years)
+    except ValueError:
+         # if the date would be invalid after adjustment, fixes it
+        return Date + (date(Date.year + years, 1, 1) - date(Date.year, 3, 1))
+
+def get_regno():
+    # Asks the user for their regno
+    # returns the regno if it's valid, otherwise returns None
+
+    userRegno = input("Provide the registration number(regno) of the registration you wish to renew: ")
+    try:
+        int(userRegno)
+    except:
+        print("Error: regno must be a number.")
+        userRegno = None
+
+    return userRegno
+
+def query(userRegno, cur):
+    # ensure the validity of the regno
+    # userRegno- inputted regno
+    # cur - cursor used to navigate the database
+
+    # isValid is false when regno isnt not know to be valid, true otherwise
+    isValid = False
+
+    # query the regno
+    c.execute("select expiry from registrations where regno = :num;", {"num":userRegno})
+    res = c.fetchall()
+    try:
+        # this throws an error if the query is not as expected, ie empty or an int/str
+        res[0][0]
+        # if above didnt through an error, query is valid
+        isValid = True
+    except:
+        # print error if query isnt valid
+        print("Error: the entered regno is not in the database. Please enter a valid regno.")
+        # ask for another regno
+        userRegno = input("Provide the registration number(regno) of the registration you wish to renew: ")
+    return isValid, userRegno, res
+
 def renew_vehicle_reg():
-    pass
+    path = "./mini_project.db"
+
+    userRegno = None
+
+    # get the regno
+    while (userRegno == None):
+    userRegno = get_regno()
+
+    # ensure the validity of the regno
+    validQuery = False
+    while (validQuery == False):
+        validQuery, userRegno, res = query(userRegno,cur)
+
+    # result is just the date from the query(takes date out of tuple)
+    result = res[0][0]
+
+    # expiry is the date from the query, turned into a date type
+    expiry = datetime.date(int(result[0])*1000 + int(result[1])*100 + int(result[2])*10 + int(result[3]), int(result[5])*10 + int(result[6]), int(result[8])*10 + int(result[9]))
+
+    # find current date
+    currDate = datetime.date.today()
+
+    if expiry <= currDate:
+        # if expiry <= current date, set the new expiry date to one year from now
+        newExpiry = add_year(currDate, 1)
+    else:
+        # otherwise, increment the expiry year by one year
+        newExpiry = add_year(expiry, 1)
+
+    # update the correct registration with the new expiry date
+    c.execute("update registrations set expiry = :date where regno = :num;", {"date":newExpiry, "num":userRegno})
+
+    c.close()
 
 def process_bill_of_sale():
     print('Proces a Bill of Sale')
