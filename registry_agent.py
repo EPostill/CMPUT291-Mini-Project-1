@@ -32,6 +32,7 @@ def agent_terminal(user_info):
             return
         else:
             print("Invalid input")
+        con.connection.commit()
 
 
 

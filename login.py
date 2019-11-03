@@ -45,3 +45,5 @@ def main():
             print("Invalid input")
     con.connection.commit()
     con.c.close()
+
+    return

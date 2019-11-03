@@ -20,6 +20,7 @@ def officer_terminal():
             return
         else:
             print("Invalid input")
+        con.connection.commit()
 
 
 def issue_a_ticket():
