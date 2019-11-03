@@ -16,24 +16,20 @@ def agent_terminal(user_info):
 
     while True:
         intent = input("please type the number of the action you would like to perform: ")
-        try:
-            int(intent)
-        except:
-            pass
 
-        if intent == 1:
+        if intent == '1':
             register_birth(user_info)
-        elif intent == 2:
+        elif intent == '2':
             register_marriage(user_info)
-        elif intent == 3:
+        elif intent == '3':
             renew_vehicle_reg()
-        elif intent == 4:
+        elif intent == '4':
             process_bill_of_sale()
-        elif intent == 5:
+        elif intent == '5':
             process_payment()
-        elif intent == 6:
+        elif intent == '6':
             get_driver_abstract()
-        elif intent == 7:
+        elif intent == '7':
             return
         else:
             print("Invalid input")
@@ -173,7 +169,7 @@ def process_bill_of_sale():
         print("That person does not exist!")
         return
 
-
+    #get or create other info relevant to registration
     new_plate = input("New Liscense Plate: ")
     d = date.today()
     expiry = d.replace(year=d.year + 1)
@@ -251,7 +247,7 @@ def process_payment():
 def get_driver_abstract():
     print("Get Driver Abstract")
 
-    fname, lname = input("Driver's name(First Last): ")
+    fname, lname = input("Driver's name(First Last): ").split()
 
     #get driver ticket info
     con.c.execute("""
@@ -260,7 +256,7 @@ def get_driver_abstract():
     WHERE r.regno = t.regno
     AND fname = ? COLLATE NOCASE
     AND lname = ? COLLATE NOCASE;
-    """, {fname, lname})
+    """, (fname, lname, ))
     result = con.c.fetchone()
 
     if not result:
@@ -298,13 +294,16 @@ def get_driver_abstract():
         rows = con.c.fetchall()
         offset += 5
 
+        #check if there are still tickets to show
         if not rows:
             print("All tickets have been displayed")
             return
         
+        #print the tickets
         for row in rows:
             print(row)
 
+        #check if there is another page of tickets to be shown
         if len(rows) == 5:
             see_tickets = input("Would like like to view more (y/n)?")
         else:

@@ -12,16 +12,12 @@ def officer_terminal():
 
     while True:
         intent = input("please type the number of the action you would like to perform: ")
-        try:
-            int(intent)
-        except:
-            pass
 
-        if intent == 1:
+        if intent == '1':
             issue_a_ticket()
-        elif intent == 2:
+        elif intent == '2':
             find_car_owner()
-        elif intent == 3:
+        elif intent == '3':
             return
         else:
             print("Invalid input")
