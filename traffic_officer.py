@@ -122,4 +122,173 @@ def issue_a_ticket():
     exe_issue_a_ticket()    
 
 def find_car_owner():
-    pass
+    c = con.cursor()
+
+    # get the inputs from user about the car information    
+    make = input("Provide the make of a car to search for(or press enter to search for the model): ")
+    model = input("Provide the model of a car to search for(or press enter to search for the year): ")
+    year = input("Provide the year of the car you want to search for(or press enter to search for the color): ")
+    color = input("Provide the color of the car you want to search for(or press enter to search for the plate): ")
+    plate = input("Provide the plate of the car you want to search for(or press enter to perform the search): ")
+
+    # make empty tuples with respect to the potentially inputted informations
+    makeTup = ()
+    modelTup = ()
+    yearTup = ()
+    colorTup = ()
+    plateTup = ()
+
+    # if there are any inputs in a given piece of information, query the vin for those inputs
+    if (len(make) > 1):
+        c.execute("select vin from vehicles where make = :make collate NOCASE;", {"make":make})
+        makeTup = c.fetchall()
+
+    if (len(model) > 1):
+        c.execute("select vin from vehicles where model = :model collate NOCASE;", {"model":model})
+        modelTup = c.fetchall()
+
+    if (len(year) > 1):
+        c.execute("select vin from vehicles where year = :year collate NOCASE;", {"year":year})
+        yearTup = c.fetchall()
+
+    if (len(color) > 1):
+        c.execute("select vin from vehicles where color = :color collate NOCASE;", {"color":color})
+        colorTup = c.fetchall()
+
+    if (len(plate) > 1):
+        c.execute("select vin from registrations where plate = :plate collate NOCASE", {"plate":plate})
+        plateTup = c.fetchall()
+
+    # carSet holds all the vin
+    carSet = set()
+
+    # store the previously found vins in carSet
+    if (len(makeTup) > 0):
+        for car in range(len(makeTup)):
+            carSet.add(makeTup[car][0])
+
+    if (len(modelTup) > 0):
+        for car in range(len(modelTup)):
+            carSet.add(modelTup[car][0])
+
+    if (len(yearTup) > 0):
+        for car in range(len(yearTup)):
+            carSet.add(yearTup[car][0])
+
+    if (len(colorTup) > 0):
+        for car in range(len(colorTup)):
+            carSet.add(colorTup[car][0])
+
+    if (len(plateTup) > 0):
+        for car in range(len(plateTup)):
+            carSet.add(plateTup[car][0])
+
+    # returns if nothing was inputted
+    if (len(carSet) == 0):
+        print("There was not any input or no values were returned. Returning...")
+        return
+
+
+    # if there were inputes
+    if (len(carSet) > 0):
+        # infoList will hold the desired information with respect to the cars the user wants to know more about
+        infoList = list()
+        # for each vin, find the necessary information
+        for vin in carSet:
+            # tempList temporarily holds the queried info
+            tempList = list()
+
+            # find all desired information from the vehicles table
+            c.execute("select make, model, year, color from vehicles where vin = :vin;", {"vin":vin})
+            temp = c.fetchall()
+            # append all acquired information to the temporary list
+            for info in range(len(temp)):
+                tempList.append(temp[info])
+
+            # find all the desired information from the registrations table
+            c.execute("select plate, regdate, expiry, fname, lname from registrations where vin = :vin;",   {"vin":vin})
+            temp = c.fetchall()
+            # append all acquired information to the temporary list
+            for info in range(len(temp)):
+                tempList.append(temp[info])
+
+            # append the temporary list to the permanent information list
+            infoList.append(tempList)
+
+    # if the query returned more than 4 cars
+    if (len(carSet) >= 4):
+        foundCar = False
+        while (foundCar == False):
+            # print a list of the info from all the queried cars
+            print("Car information is in the format: make, model, year, color, plate")
+            for i in range(len(carSet)):
+                print(str(i+1) + ". " + str(infoList[i][0][0]) + ",", end = ' ')
+                print(str(infoList[i][0][1]) + ",", end = ' ')
+                print(str(infoList[i][0][2]) + ",", end = ' ')
+                print(str(infoList[i][0][3]) + ",", end = ' ')
+
+            	# if the car has a registered owner
+                if (len(infoList[i]) > 1):
+                    print(str(infoList[i][1][0]))
+                # otherwise, it doesnt have a plate
+                else:
+                    print("no plate")
+
+            # matchCar is the index+1 of the matching car in the infoList
+            matchCar = input("Enter the number of the car you are looking for: ")
+
+            validNum = False
+            while (validNum == False):
+                try:
+                    matchCar = int(matchCar)
+                    if (matchCar <= len(carSet) and matchCar > 0):
+                        validNum = True
+                    else:
+                        print("Error. Please enter a number that is within the listed values.")
+                except:
+                    print("Error. Please enter a number (ie 1, 2, 3, ...) that is within the listed values.")
+
+                if (validNum == False):
+                    matchCar = input("Enter the number of the car you are looking for: ")
+
+            # the index of the car will be at the entered value minus one
+            carInd = matchCar - 1
+
+            print("The make is " + str(infoList[carInd][0][0]), end = '. ')
+            print("The model is " + str(infoList[carInd][0][1]), end = '. ')
+            print("The year is " + str(infoList[carInd][0][2]), end = '. ')
+            print("The color is " + str(infoList[carInd][0][3]), end = '. ')
+
+            if (len(infoList[carInd]) > 1):
+                print("The plate is " + str(infoList[carInd][1][0]), end = '. ')
+                print("The latest registration date is " + str(infoList[carInd][1][1]), end = '. ')
+                print("The registration expiry date is " + str(infoList[carInd][1][2]), end = '. ')
+                print("The name of the person listed in the record is " + str(infoList[carInd][1][3]) + ' ' + str(infoList[carInd][1][4]), end = '.\n')
+            else:
+                print("This car has no owner.")
+
+            ans = input("Was this the car you were looking for?(y for yes): ")
+            if (ans.lower() == 'y'):
+                foundCar = True
+    else:
+        currCar = 1
+        for carInd in range(len(infoList)):
+                if (len(infoList) > 1):
+                        print("The information for car number " + str(currCar) + " is:")
+                        currCar += 1
+                else:
+                        print("The car's information is:")
+
+                print("The make is " + str(infoList[carInd][0][0]), end = '. ')
+                print("The model is " + str(infoList[carInd][0][1]), end = '. ')
+                print("The year is " + str(infoList[carInd][0][2]), end = '. ')
+                print("The color is " + str(infoList[carInd][0][3]), end = '. ')
+
+                if (len(infoList[carInd]) > 1):
+                    print("The plate is " + str(infoList[carInd][1][0]), end = '. ')
+                    print("The latest registration date is " + str(infoList[carInd][1][1]), end = '. ')
+                    print("The registration expiry date is " + str(infoList[carInd][1][2]), end = '. ')
+                    print("The name of the person listed in the record is " + str(infoList[carInd][1][3]) + ' ' + str(infoList[carInd][1][4]), end = '.\n')
+                else:
+                    print("This car has no owner.")
+
