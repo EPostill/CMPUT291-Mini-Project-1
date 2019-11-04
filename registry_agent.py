@@ -203,6 +203,12 @@ def get_tno():
     con.c.execute("select * from payments where tno = :num;", {"num":tno})
     result = con.c.fetchall()
 	
+    if (len(result) == 0):
+        con.c.execute("select tno, vdate, fine from tickets where tno = :tno", {"tno":tno})
+        result = con.c.fetchall()
+        if (len(result) != 0):
+            con.c.execute("insert into payments values (:tno, :pdate, :amount)", {"tno":tno, "pdate":result[0][1], "amount":result[0][2]})
+	
     # make sure the query is valid
     try:
         result[0][0]
