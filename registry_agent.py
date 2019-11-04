@@ -203,6 +203,7 @@ def get_tno():
     con.c.execute("select * from payments where tno = :num;", {"num":tno})
     result = con.c.fetchall()
 	
+	# creates entry in payments if there is none
     if (len(result) == 0):
         con.c.execute("select tno, vdate, fine from tickets where tno = :tno", {"tno":tno})
         result = con.c.fetchall()
