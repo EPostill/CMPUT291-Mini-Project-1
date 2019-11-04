@@ -122,7 +122,7 @@ def issue_a_ticket():
     exe_issue_a_ticket()    
 
 def find_car_owner():
-    c = con.cursor()
+    #c = con.cursor()
 
     # get the inputs from user about the car information    
     make = input("Provide the make of a car to search for(or press enter to search for the model): ")
@@ -140,24 +140,24 @@ def find_car_owner():
 
     # if there are any inputs in a given piece of information, query the vin for those inputs
     if (len(make) > 1):
-        c.execute("select vin from vehicles where make = :make collate NOCASE;", {"make":make})
-        makeTup = c.fetchall()
+        con.c.execute("select vin from vehicles where make = :make collate NOCASE;", {"make":make})
+        makeTup = con.c.fetchall()
 
     if (len(model) > 1):
-        c.execute("select vin from vehicles where model = :model collate NOCASE;", {"model":model})
-        modelTup = c.fetchall()
+        con.c.execute("select vin from vehicles where model = :model collate NOCASE;", {"model":model})
+        modelTup = con.c.fetchall()
 
     if (len(year) > 1):
-        c.execute("select vin from vehicles where year = :year collate NOCASE;", {"year":year})
-        yearTup = c.fetchall()
+        con.c.execute("select vin from vehicles where year = :year collate NOCASE;", {"year":year})
+        yearTup = con.c.fetchall()
 
     if (len(color) > 1):
-        c.execute("select vin from vehicles where color = :color collate NOCASE;", {"color":color})
-        colorTup = c.fetchall()
-
+        con.c.execute("select vin from vehicles where color = :color collate NOCASE;", {"color":color})
+        colorTup = con.c.fetchall()
+        
     if (len(plate) > 1):
-        c.execute("select vin from registrations where plate = :plate collate NOCASE", {"plate":plate})
-        plateTup = c.fetchall()
+        con.c.execute("select vin from registrations where plate = :plate collate NOCASE", {"plate":plate})
+        plateTup = con.c.fetchall()
 
     # carSet holds all the vin
     carSet = set()
@@ -185,7 +185,7 @@ def find_car_owner():
 
     # returns if nothing was inputted
     if (len(carSet) == 0):
-        print("There was not any input or no values were returned. Returning...")
+        print("There was not any input or no values were returned. Returning...\n")
         return
 
 
@@ -199,15 +199,15 @@ def find_car_owner():
             tempList = list()
 
             # find all desired information from the vehicles table
-            c.execute("select make, model, year, color from vehicles where vin = :vin;", {"vin":vin})
-            temp = c.fetchall()
+            con.c.execute("select make, model, year, color from vehicles where vin = :vin;", {"vin":vin})
+            temp = con.c.fetchall()
             # append all acquired information to the temporary list
             for info in range(len(temp)):
                 tempList.append(temp[info])
 
             # find all the desired information from the registrations table
-            c.execute("select plate, regdate, expiry, fname, lname from registrations where vin = :vin;",   {"vin":vin})
-            temp = c.fetchall()
+            con.c.execute("select plate, regdate, expiry, fname, lname from registrations where vin = :vin;",   {"vin":vin})
+            temp = con.c.fetchall()
             # append all acquired information to the temporary list
             for info in range(len(temp)):
                 tempList.append(temp[info])
