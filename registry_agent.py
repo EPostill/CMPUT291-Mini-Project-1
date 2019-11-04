@@ -15,6 +15,7 @@ def agent_terminal(user_info):
     print("7 - log out")
 
     while True:
+        print("")
         intent = input("please type the number of the action you would like to perform: ")
 
         if intent == '1':
@@ -181,7 +182,6 @@ def process_bill_of_sale():
     """, {'regno': regno, 'regdate': d, 'expiry': expiry, 'plate': new_plate, 'vin':  recent_reg['vin'], 'fname': new_fname, 'lname': new_lname})
 
     print("Bill of Sale Successfully Processed")
-    print("")
     return
 
 
@@ -218,7 +218,7 @@ def process_payment():
     # query the necessary information
     validQuery = False
     while (validQuery == False):
-        validQuery, result, tno = get_tno(c)
+        validQuery, result, tno = get_tno()
 
     paymentInfo = result[0]
     # currOwed is the currently owned value
@@ -250,9 +250,9 @@ def get_driver_abstract():
 
     fname, lname = input("Driver's name(First Last): ").split()
 
-    #get driver ticket info
+    #get total tickets and tickets from the past 2 years
     con.c.execute("""
-    SELECT fname, lname, COUNT(tno) as tickets
+    SELECT fname, lname, COUNT(tno) as total_tickets
     FROM registrations r, tickets t
     WHERE r.regno = t.regno
     AND fname = ? COLLATE NOCASE
@@ -260,7 +260,19 @@ def get_driver_abstract():
     """, (fname, lname))
 
     result = con.c.fetchone()
-    tickets = result['tickets']
+    total_tickets = result['total_tickets']
+
+    con.c.execute("""
+    SELECT fname, lname, COUNT(tno) as recent_tickets
+    FROM registrations r, tickets t
+    WHERE r.regno = t.regno
+    AND vdate > date('now', '-2 year')
+    AND fname = ? COLLATE NOCASE
+    AND lname = ? COLLATE NOCASE;
+    """, (fname, lname))
+
+    result = con.c.fetchone()
+    recent_tickets = result['recent_tickets']
 
     #get number of demerit notices, get demerits within 2 yrs and lifetime demerits
     con.c.execute("""
@@ -272,7 +284,7 @@ def get_driver_abstract():
     total = con.c.fetchone()
 
     con.c.execute("""
-    SELECT SUM(points) as recent_points
+    SELECT SUM(points) as recent_points, COUNT(ddate) as recent_notices
     FROM demeritNotices
     WHERE ddate > date('now', '-2 year')
     AND fname = ? COLLATE NOCASE
@@ -281,29 +293,33 @@ def get_driver_abstract():
     recent = con.c.fetchone()
 
 
-    notices = total['notices']
+    total_notices = total['notices']
     total_points = total['total_points']
+
     recent_points = recent['recent_points']
+    recent_notices = recent['recent_notices']
 
+    #display driver abstract
     print("Driver abstract for {} {}:".format(fname, lname))
-    print("Number of tickets: {}".format(tickets))
-    print("Number of demerit notices: {}".format(notices))
-    print("Total demerit points: {}".format(total_points))
-    print("Demerit points within the past 2 years: {}".format(recent_points))
+    print("Total:")
+    print("Number of tickets: {}".format(total_tickets))
+    print("Number of demerit notices: {}".format(total_notices))
+    print("Demerit points: {}".format(total_points))
+    print("")
+    print("Past 2 years:")
+    print("Number of tickets: {}".format(recent_tickets))
+    print("Number of demerit notices: {}".format(recent_notices))
+    print("Demerit points: {}".format(recent_points))
 
 
-    if tickets == 0:
-        print("")
-        return
-    
     see_tickets = input("Would you like to view tickets recieved (y/n)?: ")
-    if see_tickets.lower() != 'y':
+    if see_tickets.lower() != 'y' or total_tickets == 0:
         return
 
 
     offset = 0
     while see_tickets.lower() == 'y':
-        #get info about tickets
+        #get info about tickets, 5 at a time
         con.c.execute("""
         SELECT tno, vdate, fine, r.regno, make, model, violation
         FROM registrations r, tickets t, vehicles v
@@ -315,6 +331,7 @@ def get_driver_abstract():
         LIMIT 5 OFFSET ?;
         """, (fname, lname, offset))
         rows = con.c.fetchall()
+        #remember offset
         offset += 5
 
         #check if there are still tickets to show
@@ -339,7 +356,6 @@ def get_driver_abstract():
             see_tickets = 'n'
 
     print("All info has been displayed")
-    print("")
     return
 
 
