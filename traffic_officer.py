@@ -181,8 +181,6 @@ def find_car_owner():
         	        setList[usedSets].add(queryRes[i][j][0])
         	    usedSets += 1
         
-        print(setList)
-        
         # since there is more than one input, we can intersect the first 2 inputs
         vins = setList[0].intersection(setList[1])
         
