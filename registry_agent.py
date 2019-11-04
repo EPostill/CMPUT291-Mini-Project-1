@@ -103,10 +103,10 @@ def renew_vehicle_reg():
     result = res[0][0]
 
     # expiry is the date from the query, turned into a date type
-    expiry = datetime.date(int(result[0])*1000 + int(result[1])*100 + int(result[2])*10 + int(result[3]), int(result[5])*10 + int(result[6]), int(result[8])*10 + int(result[9]))
+    expiry = datetime(year = (int(result[0])*1000 + int(result[1])*100 + int(result[2])*10 + int(result[3])), month = (int(result[5])*10 + int(result[6])), day = (int(result[8])*10 + int(result[9])))
 
     # find current date
-    currDate = datetime.date.today()
+    currDate = datetime.today()
 
     if expiry <= currDate:
         # if expiry <= current date, set the new expiry date to one year from now
