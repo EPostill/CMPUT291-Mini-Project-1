@@ -242,7 +242,7 @@ def process_payment():
     con.c.execute("update payments set pdate = :date where tno = :tno;", {"date":currDate, "tno":tno})
     con.c.execute("update payments set amount = :num where tno = :tno;", {"num":currOwed, "tno":tno})
     
-    print("The new amount owed is " + currOwed + ".")
+    print("The new amount owed is " + str(currOwed) + ".")
 
     return
 
