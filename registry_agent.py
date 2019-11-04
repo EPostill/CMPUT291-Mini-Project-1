@@ -170,7 +170,7 @@ def process_bill_of_sale():
         return
 
     #get or create other info relevant to registration
-    new_plate = input("New Liscense Plate: ")
+    new_plate = input("New License Plate: ")
     d = date.today()
     expiry = d.replace(year=d.year + 1)
     regno = new_primary_key('registrations', 'regno')
