@@ -42,6 +42,7 @@ def main():
         if intent.lower() == 'l':
             log_in()
         elif intent.lower() == 'q':
+            print("Exiting Now...")
             break
         else:
             print("Invalid input")

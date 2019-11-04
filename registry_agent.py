@@ -181,6 +181,7 @@ def process_bill_of_sale():
     """, {'regno': regno, 'regdate': d, 'expiry': expiry, 'plate': new_plate, 'vin':  recent_reg['vin'], 'fname': new_fname, 'lname': new_lname})
 
     print("Bill of Sale Successfully Processed")
+    print("")
     return
 
 
@@ -256,21 +257,43 @@ def get_driver_abstract():
     WHERE r.regno = t.regno
     AND fname = ? COLLATE NOCASE
     AND lname = ? COLLATE NOCASE;
-    """, (fname, lname, ))
+    """, (fname, lname))
+
     result = con.c.fetchone()
-
-    if not result:
-        print("Driver not found")
-        return
-
     tickets = result['tickets']
 
     #get number of demerit notices, get demerits within 2 yrs and lifetime demerits
     con.c.execute("""
-    TODO
-    """)
+    SELECT COUNT(ddate) as notices, SUM(points) as total_points
+    FROM demeritNotices
+    WHERE fname = ? COLLATE NOCASE
+    AND lname = ? COLLATE NOCASE;
+    """, (fname, lname))
+    total = con.c.fetchone()
+
+    con.c.execute("""
+    SELECT SUM(points) as recent_points
+    FROM demeritNotices
+    WHERE ddate > date('now', '-2 year')
+    AND fname = ? COLLATE NOCASE
+    AND lname = ? COLLATE NOCASE
+    """, (fname, lname))
+    recent = con.c.fetchone()
+
+
+    notices = total['notices']
+    total_points = total['total_points']
+    recent_points = recent['recent_points']
+
+    print("Driver abstract for {} {}:".format(fname, lname))
+    print("Number of tickets: {}".format(tickets))
+    print("Number of demerit notices: {}".format(notices))
+    print("Total demerit points: {}".format(total_points))
+    print("Demerit points within the past 2 years: {}".format(recent_points))
+
 
     if tickets == 0:
+        print("")
         return
     
     see_tickets = input("Would you like to view tickets recieved (y/n)?: ")
@@ -290,18 +313,24 @@ def get_driver_abstract():
         AND lname = ? COLLATE NOCASE
         ORDER BY vdate DESC
         LIMIT 5 OFFSET ?;
-        """, {fname, lname, offset})
+        """, (fname, lname, offset))
         rows = con.c.fetchall()
         offset += 5
 
         #check if there are still tickets to show
         if not rows:
-            print("All tickets have been displayed")
             return
         
         #print the tickets
+        print("")
         for row in rows:
-            print(row)
+            print("Ticket Number: {}".format(row['tno']))
+            print("Registration Number: {}".format(row['regno']))
+            print("Fine Amount: {}".format(row['fine']))
+            print("Violation: {}".format(row['violation']))
+            print("Date: {}".format(row['vdate']))
+            print("")
+
 
         #check if there is another page of tickets to be shown
         if len(rows) == 5:
@@ -309,6 +338,8 @@ def get_driver_abstract():
         else:
             see_tickets = 'n'
 
+    print("All info has been displayed")
+    print("")
     return
 
 
