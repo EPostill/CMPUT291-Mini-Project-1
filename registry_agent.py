@@ -235,7 +235,14 @@ def process_payment():
 
     # tell user how much they owe then ask for a payment input      
     print("You currently owe " + str(currOwed) + ".")
-    payment = int(input("Enter the amount you would like to pay: "))
+    
+    validPayment = False
+    while (validPayment == False):
+        try:
+            payment = int(input("Enter the amount you would like to pay: "))
+            validPayment = True
+        except:
+            print("Invalid Input. Please enter a number.")
 
 
     # ensure that the inputted payment does not exceed that which is owed
