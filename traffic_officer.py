@@ -122,8 +122,6 @@ def issue_a_ticket():
     exe_issue_a_ticket()    
 
 def find_car_owner():
-    #c = con.cursor()
-
     # get the inputs from user about the car information    
     make = input("Provide the make of a car to search for(or press enter to search for the model): ")
     model = input("Provide the model of a car to search for(or press enter to search for the year): ")
