@@ -218,7 +218,7 @@ def process_payment():
     # query the necessary information
     validQuery = False
     while (validQuery == False):
-        validQuery, result, tno = get_tno(c)
+        validQuery, result, tno = get_tno()
 
     paymentInfo = result[0]
     # currOwed is the currently owned value
