@@ -117,6 +117,8 @@ def renew_vehicle_reg():
 
     # update the correct registration with the new expiry date
     con.c.execute("update registrations set expiry = :date where regno = :num;", {"date":newExpiry, "num":userRegno})
+    
+    print("The new expiry date is: " + str(newExpiry) + ".")
 
 
 
@@ -239,6 +241,8 @@ def process_payment():
     # update with the new information
     con.c.execute("update payments set pdate = :date where tno = :tno;", {"date":currDate, "tno":tno})
     con.c.execute("update payments set amount = :num where tno = :tno;", {"num":currOwed, "tno":tno})
+    
+    print("The new amount owed is " + currOwed + ".")
 
     return
 
