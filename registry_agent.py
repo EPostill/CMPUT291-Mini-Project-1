@@ -222,7 +222,7 @@ def process_payment():
     # currOwed is the currently owned value
     currOwed = int(paymentInfo[2])
     # currDate is the current date
-    currDate = datetime.date.today()
+    currDate = date.today()
 
     # tell user how much they owe then ask for a payment input      
     print("You currently owe " + str(currOwed) + ".")
