@@ -250,7 +250,7 @@ def get_driver_abstract():
 
     fname, lname = input("Driver's name(First Last): ").split()
 
-    #get driver ticket info
+    #get total tickets and tickets from the past 2 years
     con.c.execute("""
     SELECT fname, lname, COUNT(tno) as total_tickets
     FROM registrations r, tickets t
@@ -299,6 +299,7 @@ def get_driver_abstract():
     recent_points = recent['recent_points']
     recent_notices = recent['recent_notices']
 
+    #display driver abstract
     print("Driver abstract for {} {}:".format(fname, lname))
     print("Total:")
     print("Number of tickets: {}".format(total_tickets))
@@ -311,17 +312,14 @@ def get_driver_abstract():
     print("Demerit points: {}".format(recent_points))
 
 
-    if total_tickets == 0:
-        return
-    
     see_tickets = input("Would you like to view tickets recieved (y/n)?: ")
-    if see_tickets.lower() != 'y':
+    if see_tickets.lower() != 'y' or total_tickets == 0:
         return
 
 
     offset = 0
     while see_tickets.lower() == 'y':
-        #get info about tickets
+        #get info about tickets, 5 at a time
         con.c.execute("""
         SELECT tno, vdate, fine, r.regno, make, model, violation
         FROM registrations r, tickets t, vehicles v
@@ -333,6 +331,7 @@ def get_driver_abstract():
         LIMIT 5 OFFSET ?;
         """, (fname, lname, offset))
         rows = con.c.fetchall()
+        #remember offset
         offset += 5
 
         #check if there are still tickets to show
